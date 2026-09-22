@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root { --background: 42 35% 97%; --foreground: 145 22% 14%; --card: 0 0% 100%; --muted: 40 18% 92%; --primary: 145 42% 22%; --gold: 39 72% 49%; --destructive: 0 72% 51%; --success: 151 55% 35%; --border: 40 15% 86%; }
+  .dark { --background: 145 24% 7%; --foreground: 42 25% 95%; --card: 145 20% 10%; --muted: 145 15% 16%; --primary: 144 42% 46%; --gold: 39 72% 55%; --destructive: 0 64% 55%; --success: 151 50% 48%; --border: 145 14% 20%; }
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground antialiased; }
+}
+@layer components {
+  .card { @apply rounded-2xl border bg-card p-5 shadow-card; }
+  .btn { @apply inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition disabled:opacity-50; }
+  .btn-primary { @apply btn bg-primary text-white hover:opacity-90; }
+  .btn-outline { @apply btn border bg-card hover:bg-muted; }
+  .input { @apply h-11 w-full rounded-xl border bg-card px-3 text-sm outline-none transition focus:ring-2 focus:ring-primary/25; }
+  .label { @apply mb-1.5 block text-sm font-medium; }
+  .table-wrap { @apply overflow-x-auto rounded-2xl border bg-card; }
+  table { @apply w-full text-sm; }
+  th { @apply bg-muted/60 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-foreground/60; }
+  td { @apply border-t px-4 py-3; }
+}

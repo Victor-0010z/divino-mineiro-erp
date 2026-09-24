@@ -1,4 +1,4 @@
-import type { ContaPagar, Diarista, Fornecedor, PagamentoDiarista, RegistroDiaria, Solicitacao, Tarefa, Usuario } from "@/types";
+import type { ContaPagar, Diarista, Fornecedor, JornadaMotoboy, Motoboy, PagamentoDiarista, RegistroDiaria, Solicitacao, Tarefa, Usuario } from "@/types";
 
 export const usuariosMock: Usuario[] = [
   { id:"u1", nome:"Carlos Andrade", email:"admin@divinomineiro.com.br", perfil:"ADMINISTRADOR", status:"ATIVO", ultimoAcesso:"2026-09-22T09:00:00" },
@@ -36,5 +36,17 @@ export const tarefasMock: Tarefa[] = [
   { id:"t1", titulo:"Conferir estoque de bebidas", responsavelNome:"Fernanda Lopes", categoria:"Estoque", prioridade:"MEDIA", prazo:"2026-09-22", status:"EM_ANDAMENTO" },
   { id:"t2", titulo:"Negociar contrato de carnes", responsavelNome:"Carlos Andrade", categoria:"Fornecedores", prioridade:"ALTA", prazo:"2026-09-21", status:"PENDENTE" },
   { id:"t3", titulo:"Atualizar cardápio de outubro", responsavelNome:"Fernanda Lopes", categoria:"Operacional", prioridade:"BAIXA", prazo:"2026-09-28", status:"CONCLUIDA" },
-  { id:"t4", titulo:"Revisar manutenção das coifas", responsavelNome:"Carlos Andrade", categoria:"Manutenção", prioridade:"URGENTE", prazo:"2026-09-19", status:"AGUARDANDO" }
+  { id:"t4", titulo:"Revisar manutenção das coifas", responsavelNome:"Carlos Andrade", categoria:"Manutenção", prioridade:"URGENTE", prazo:"2026-09-19", status:"PENDENTE" }
+];
+export const motoboysMock: Motoboy[] = [
+  {id:"m1",nome:"Alemão",telefone:"(11) 98888-1101",chavePix:"11988881101",valorDiaria:90,valorSemanal:0,valorFrete:8.5,ativo:true,statusPagamento:"PENDENTE"},
+  {id:"m2",nome:"Luiz",telefone:"(11) 98888-1102",chavePix:"luiz@email.com",valorDiaria:90,valorSemanal:0,valorFrete:8.5,ativo:true,statusPagamento:"PENDENTE"},
+  {id:"m3",nome:"Nelber",telefone:"(11) 98888-1103",chavePix:"11988881103",valorDiaria:90,valorSemanal:0,valorFrete:8.5,ativo:true,statusPagamento:"PAGO"},
+  {id:"m4",nome:"Nikolas",telefone:"(11) 98888-1104",chavePix:"11988881104",valorDiaria:90,valorSemanal:0,valorFrete:8.5,ativo:true,statusPagamento:"PENDENTE"}
+];
+export const jornadasMotoboyMock: JornadaMotoboy[] = [
+  {motoboyId:"m1",valores:[156.5,0,114,0,0,0],folgas:[1],fretes:[8,0,3,0,0,0]},
+  {motoboyId:"m2",valores:[156.8,0,130,0,0,0],folgas:[1],fretes:[8,0,5,0,0,0]},
+  {motoboyId:"m3",valores:[0,169.5,0,0,0,0],folgas:[0,2],fretes:[0,9,0,0,0,0]},
+  {motoboyId:"m4",valores:[0,131.1,98.3,0,0,0],folgas:[0],fretes:[0,5,1,0,0,0]}
 ];

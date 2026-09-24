@@ -19,4 +19,24 @@
   table { @apply w-full text-sm; }
   th { @apply bg-muted/60 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-foreground/60; }
   td { @apply border-t px-4 py-3; }
+  .icon-action { @apply grid h-9 w-9 place-items-center rounded-lg border bg-card transition hover:-translate-y-0.5 hover:bg-muted; }
+  .icon-action svg { @apply h-4 w-4; }
+  .kanban-pending { background:#fff4e5; border-color:#f7d7a7; }
+  .kanban-progress { background:#fffbe6; border-color:#eee19d; }
+  .kanban-done { background:#eaf8ef; border-color:#bfe3cc; }
+  .notification-button { @apply relative grid h-10 w-10 place-items-center rounded-full border-0 bg-[#2c2c2c] text-white shadow-lg transition active:scale-90; }
+  .notification-button:hover { background:#383838; }
+  .notification-button:hover .bell { animation:bell-ring .9s both; }
+  .save-button { @apply btn bg-primary text-white; }
+  .save-button.saved { animation:save-bounce .6s ease; }
+  .download-button { @apply inline-flex h-10 items-center gap-2 rounded-full border-2 border-primary bg-card px-4 text-sm font-semibold text-primary transition; }
+  .download-button svg { @apply h-5 w-5; }
+  .download-button:hover { @apply bg-primary text-white; }
+  .download-button.is-loading { @apply opacity-80; }
+  .download-button.is-done { @apply border-success bg-success text-white; animation:save-bounce .55s ease; }
 }
+@keyframes bell-ring{0%,100%{transform-origin:top}15%{transform:rotate(10deg)}30%{transform:rotate(-10deg)}45%{transform:rotate(5deg)}60%{transform:rotate(-5deg)}75%{transform:rotate(2deg)}}
+@keyframes save-bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-7px)}70%{transform:translateY(2px)}}
+.typewriter-toast{position:fixed;right:24px;bottom:24px;z-index:80;display:flex;align-items:center;gap:18px;border:1px solid hsl(var(--border));border-radius:16px;background:hsl(var(--card));padding:18px 22px;box-shadow:0 18px 50px rgba(0,0,0,.18)}.typewriter-toast p{font-size:12px;opacity:.55}.typewriter{--green:#3f8b61;--green-dark:#1f5c3c;--key:#fff;--paper:#eff8f2;--text:#b8d2c0;--tool:#e4a72c;--duration:2.3s;position:relative;transform:scale(.55);width:92px;height:55px;animation:type-bounce var(--duration) linear infinite}.typewriter .slide{width:92px;height:20px;border-radius:3px;margin-left:14px;transform:translateX(14px);background:linear-gradient(var(--green),var(--green-dark));animation:type-slide var(--duration) ease infinite}.typewriter .slide:before,.typewriter .slide:after,.typewriter .slide i:before{content:"";position:absolute;background:var(--tool)}.typewriter .slide:before{width:2px;height:8px;top:6px;left:100%}.typewriter .slide:after{left:94px;top:3px;height:14px;width:6px;border-radius:3px}.typewriter .slide i{display:block;position:absolute;right:100%;width:6px;height:4px;top:4px;background:var(--tool)}.typewriter .slide i:before{right:100%;top:-2px;width:4px;border-radius:2px;height:14px}.typewriter .paper{position:absolute;left:24px;top:-26px;width:40px;height:46px;border-radius:5px;background:var(--paper);transform:translateY(46px);animation:type-paper var(--duration) linear infinite}.typewriter .paper:before{content:"";position:absolute;left:6px;right:6px;top:7px;border-radius:2px;height:4px;background:var(--text);box-shadow:0 12px 0 var(--text),0 24px 0 var(--text),0 36px 0 var(--text)}.typewriter .keyboard{width:120px;height:56px;margin-top:-10px;z-index:1;position:relative}.typewriter .keyboard:before{content:"";position:absolute;inset:0;border-radius:7px;background:linear-gradient(135deg,var(--green),var(--green-dark));transform:perspective(10px) rotateX(2deg)}
+@keyframes type-bounce{85%,92%,100%{transform:scale(.55) translateY(0)}89%{transform:scale(.55) translateY(-4px)}95%{transform:scale(.55) translateY(2px)}}@keyframes type-slide{5%{transform:translateX(14px)}30%{transform:translateX(6px)}55%{transform:translateX(0)}70%{transform:translateX(-4px)}89%{transform:translateX(-12px)}100%{transform:translateX(14px)}}@keyframes type-paper{5%,100%{transform:translateY(46px)}30%{transform:translateY(34px)}55%{transform:translateY(22px)}70%{transform:translateY(10px)}85%{transform:translateY(0)}}
+@media print{aside,header,button,.typewriter-toast{display:none!important}main{padding:0!important}.card{box-shadow:none}}

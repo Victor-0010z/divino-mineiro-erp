@@ -1,9 +1,6 @@
+"use client";
+import { useMemo, useState } from "react";
 import { PageHeading } from "@/components/page-heading";
 import { EntityTable } from "@/components/entity-table";
-const eventos=[
- ["22/09/2026 09:12","Carlos Andrade","Login realizado","Autenticação","192.168.1.10"],
- ["22/09/2026 08:44","Fernanda Lopes","Boleto cadastrado","Contas a pagar","192.168.1.22"],
- ["21/09/2026 16:03","Carlos Andrade","Solicitação aprovada","Compras","192.168.1.10"],
- ["21/09/2026 14:50","Fernanda Lopes","Pagamento confirmado","Diaristas","192.168.1.22"]
-];
-export default function Auditoria(){return <><PageHeading title="Histórico de atividades" description="Registro das ações importantes realizadas no sistema."/><EntityTable headers={["Data e hora","Usuário","Ação","Módulo","IP"]}>{eventos.map((e,i)=><tr key={i}>{e.map((v,j)=><td className={j===2?"font-semibold":""} key={j}>{v}</td>)}</tr>)}</EntityTable></>}
+const eventos = [["22/09/2026 09:12", "Carlos Andrade", "Login realizado", "Autenticação", "192.168.1.10"], ["22/09/2026 08:44", "Fernanda Lopes", "Boleto cadastrado", "Contas a pagar", "192.168.1.22"], ["21/09/2026 16:03", "Carlos Andrade", "Solicitação aprovada", "Compras", "192.168.1.10"], ["21/09/2026 14:50", "Fernanda Lopes", "Pagamento confirmado", "Diaristas", "192.168.1.22"], ["19/09/2026 18:20", "Carlos Andrade", "Semana de motoboy fechada", "Motoboys", "192.168.1.10"]];
+export default function Auditoria() { const [busca, setBusca] = useState(""), [inicio, setInicio] = useState("2026-07-01"), [fim, setFim] = useState("2026-09-24"); const filtrados = useMemo(() => eventos.filter((e) => e.join(" ").toLowerCase().includes(busca.toLowerCase())), [busca]); return <><PageHeading title="Histórico de atividades" description="A semana ativa é renovada automaticamente; consultas ficam disponíveis por até 3 meses."/><div className="card mb-5 grid gap-3 md:grid-cols-[1fr_170px_170px]"><input className="input" value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Filtrar por usuário, ação ou módulo..."/><input className="input" type="date" min="2026-06-24" value={inicio} onChange={(e) => setInicio(e.target.value)}/><input className="input" type="date" min="2026-06-24" value={fim} onChange={(e) => setFim(e.target.value)}/></div><div className="mb-3 rounded-xl border border-orange-200 bg-orange-50 p-3 text-sm text-orange-900"><b>Auditoria semanal ativa.</b> O filtro histórico consulta somente os últimos 90 dias.</div><EntityTable headers={["Data e hora", "Usuário", "Ação", "Módulo", "IP"]}>{filtrados.map((e, i) => <tr key={i}>{e.map((v, j) => <td className={j === 2 ? "font-semibold" : ""} key={j}>{v}</td>)}</tr>)}</EntityTable></>; }

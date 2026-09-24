@@ -1,12 +1,345 @@
 "use client";
+
 import { useMemo, useState } from "react";
-import { CheckCircle2, Pencil, Plus, Trash2, X } from "lucide-react";
-import { jornadasMotoboyMock, motoboysMock } from "@/lib/mock-data";
+import {
+  CalendarDays,
+  CheckCircle2,
+  Pencil,
+  Plus,
+  Trash2,
+  X,
+} from "lucide-react";
+import { motoboysMock, jornadasMotoboyMock } from "@/lib/mock-data";
 import type { Motoboy } from "@/types";
 import { moeda } from "@/lib/utils";
 import { PageHeading } from "@/components/page-heading";
 import { StatusBadge } from "@/components/status-badge";
 import { DownloadReportButton } from "@/components/download-report-button";
 import { TableFilter } from "@/components/table-filter";
-const dias=["Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
-export default function Motoboys(){const [lista,setLista]=useState(motoboysMock),[busca,setBusca]=useState(""),[modal,setModal]=useState(false),[editando,setEditando]=useState<Motoboy|null>(null);const filtrados=useMemo(()=>lista.filter(m=>m.nome.toLowerCase().includes(busca.toLowerCase())),[lista,busca]);const total=(id:string)=>jornadasMotoboyMock.find(j=>j.motoboyId===id)?.valores.reduce((a,b)=>a+b,0)||0;function salvar(e:React.FormEvent<HTMLFormElement>){e.preventDefault();const f=new FormData(e.currentTarget);const m:Motoboy={id:editando?.id||crypto.randomUUID(),nome:String(f.get("nome")),telefone:String(f.get("telefone")),chavePix:String(f.get("pix")),valorDiaria:Number(f.get("diaria")),valorSemanal:Number(f.get("semanal")),valorFrete:Number(f.get("frete")),ativo:true,statusPagamento:editando?.statusPagamento||"PENDENTE"};setLista(x=>editando?x.map(i=>i.id===m.id?m:i):[m,...x]);setModal(false);setEditando(null)}const rows=[["Motoboy",...dias,"Total","Pagamento"],...lista.map(m=>{const j=jornadasMotoboyMock.find(x=>x.motoboyId===m.id);return [m.nome,...dias.map((_,i)=>j?.folgas.includes(i)?"FOLGA":j?.valores[i]||0),total(m.id),m.statusPagamento]})];return <><PageHeading title="Motoboys" description="Escala, folgas, fretes e fechamento semanal." action={<div className="flex flex-wrap gap-2"><DownloadReportButton filename="motoboys-semana" rows={rows}/><button className="btn-primary" onClick={()=>{setEditando(null);setModal(true)}}><Plus size={17}/>Novo motoboy</button></div>}/><section className="mb-5 grid gap-4 sm:grid-cols-3"><div className="card"><p className="text-sm text-foreground/50">Ativos</p><b className="text-2xl">{lista.filter(m=>m.ativo).length}</b></div><div className="card"><p className="text-sm text-foreground/50">Total da semana</p><b className="text-2xl text-primary">{moeda(lista.reduce((s,m)=>s+total(m.id),0))}</b></div><div className="card"><p className="text-sm text-foreground/50">Pagamentos pendentes</p><b className="text-2xl text-gold">{lista.filter(m=>m.statusPagamento==="PENDENTE").length}</b></div></section><TableFilter value={busca} onChange={setBusca} placeholder="Buscar motoboy..."/><div className="table-wrap"><table><thead><tr><th>Motoboy</th>{dias.map(d=><th key={d}>{d}</th>)}<th>Total</th><th>Pagamento</th><th>Ações</th></tr></thead><tbody>{filtrados.map(m=>{const j=jornadasMotoboyMock.find(x=>x.motoboyId===m.id);return <tr key={m.id}><td><b>{m.nome}</b><p className="text-xs text-foreground/45">PIX: {m.chavePix}</p></td>{dias.map((d,i)=><td key={d}>{j?.folgas.includes(i)?<b className="text-red-500">FOLGA</b>:moeda(j?.valores[i]||0)}</td>)}<td className="font-bold text-primary">{moeda(total(m.id))}</td><td><StatusBadge status={m.statusPagamento}/></td><td><div className="flex gap-1"><button aria-label="Editar" className="icon-action" onClick={()=>{setEditando(m);setModal(true)}}><Pencil/></button><button aria-label="Marcar como pago" className="icon-action" onClick={()=>setLista(x=>x.map(i=>i.id===m.id?{...i,statusPagamento:"PAGO"}:i))}><CheckCircle2/></button><button aria-label="Excluir" className="icon-action text-red-600" onClick={()=>confirm("Excluir motoboy?")&&setLista(x=>x.filter(i=>i.id!==m.id))}><Trash2/></button></div></td></tr>})}</tbody></table></div>{modal&&<div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4"><form onSubmit={salvar} className="card w-full max-w-2xl"><div className="mb-5 flex justify-between"><h2 className="text-xl font-bold">{editando?"Editar":"Novo"} motoboy</h2><button type="button" onClick={()=>setModal(false)}><X/></button></div><div className="grid gap-4 sm:grid-cols-2">{[["nome","Nome",editando?.nome],["telefone","Telefone",editando?.telefone],["pix","Chave PIX",editando?.chavePix],["diaria","Valor da diária",editando?.valorDiaria],["semanal","Valor fixo semanal",editando?.valorSemanal],["frete","Valor por frete",editando?.valorFrete]].map(([n,l,v])=><label key={String(n)}><span className="label">{l}</span><input className="input" name={String(n)} defaultValue={v} type={["diaria","semanal","frete"].includes(String(n))?"number":"text"} step="0.01" required/></label>)}</div><button className="btn-primary mt-6">Salvar cadastro</button></form></div>}</>}
+
+const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+const ocorrencias = [
+  "TRABALHOU",
+  "FOLGA",
+  "FALTOU",
+  "FERIADO",
+  "ATESTADO",
+] as const;
+type Ocorrencia = (typeof ocorrencias)[number];
+type Dia = { tipo: Ocorrencia; valor: number };
+
+function jornadaInicial(motoboyId: string): Dia[] {
+  const jornada = jornadasMotoboyMock.find(
+    (item) => item.motoboyId === motoboyId,
+  );
+  return dias.map((_, index) => ({
+    tipo: jornada?.folgas.includes(index) ? "FOLGA" : "TRABALHOU",
+    valor: jornada?.valores[index] || 0,
+  }));
+}
+
+export default function Motoboys() {
+  const [lista, setLista] = useState<Motoboy[]>(motoboysMock);
+  const [jornadas, setJornadas] = useState<Record<string, Dia[]>>(() =>
+    Object.fromEntries(motoboysMock.map((m) => [m.id, jornadaInicial(m.id)])),
+  );
+  const [busca, setBusca] = useState("");
+  const [inicio, setInicio] = useState("2026-09-21");
+  const [fim, setFim] = useState("2026-09-26");
+  const [modal, setModal] = useState(false);
+  const [editando, setEditando] = useState<Motoboy | null>(null);
+  const filtrados = useMemo(
+    () =>
+      lista.filter((m) => m.nome.toLowerCase().includes(busca.toLowerCase())),
+    [lista, busca],
+  );
+  const total = (id: string) =>
+    (jornadas[id] || []).reduce(
+      (s, dia) => s + (dia.tipo === "TRABALHOU" ? dia.valor : 0),
+      0,
+    );
+
+  function atualizarDia(id: string, indice: number, alteracao: Partial<Dia>) {
+    setJornadas((atual) => ({
+      ...atual,
+      [id]: (atual[id] || jornadaInicial(id)).map((dia, i) =>
+        i === indice
+          ? {
+              ...dia,
+              ...alteracao,
+              valor:
+                alteracao.tipo && alteracao.tipo !== "TRABALHOU"
+                  ? 0
+                  : (alteracao.valor ?? dia.valor),
+            }
+          : dia,
+      ),
+    }));
+    setLista((atual) =>
+      atual.map((item) =>
+        item.id === id ? { ...item, statusPagamento: "PENDENTE" } : item,
+      ),
+    );
+  }
+
+  function marcarPago(id: string) {
+    if (
+      !confirm(
+        "Confirmar o pagamento? Os lançamentos desta semana serão zerados.",
+      )
+    )
+      return;
+    setLista((atual) =>
+      atual.map((item) =>
+        item.id === id ? { ...item, statusPagamento: "PAGO" } : item,
+      ),
+    );
+    setJornadas((atual) => ({
+      ...atual,
+      [id]: dias.map(() => ({ tipo: "TRABALHOU", valor: 0 })),
+    }));
+  }
+
+  function salvar(evento: React.FormEvent<HTMLFormElement>) {
+    evento.preventDefault();
+    const dados = new FormData(evento.currentTarget);
+    const motoboy: Motoboy = {
+      id: editando?.id || crypto.randomUUID(),
+      nome: String(dados.get("nome")),
+      telefone: String(dados.get("telefone")),
+      chavePix: String(dados.get("pix")),
+      valorDiaria: Number(dados.get("diaria")),
+      ativo: true,
+      statusPagamento: editando?.statusPagamento || "PENDENTE",
+    };
+    setLista((atual) =>
+      editando
+        ? atual.map((item) => (item.id === motoboy.id ? motoboy : item))
+        : [motoboy, ...atual],
+    );
+    if (!editando)
+      setJornadas((atual) => ({
+        ...atual,
+        [motoboy.id]: dias.map(() => ({ tipo: "TRABALHOU", valor: 0 })),
+      }));
+    setModal(false);
+    setEditando(null);
+  }
+
+  const rows = [
+    ["Motoboy", ...dias, "Total", "Pagamento"],
+    ...lista.map((m) => [
+      m.nome,
+      ...(jornadas[m.id] || []).map((d) =>
+        d.tipo === "TRABALHOU" ? d.valor : d.tipo,
+      ),
+      total(m.id),
+      m.statusPagamento,
+    ]),
+  ];
+
+  return (
+    <>
+      <PageHeading
+        title="Motoboys"
+        description="Escala diária, ocorrências e fechamento semanal."
+        action={
+          <div className="flex flex-wrap gap-2">
+            <DownloadReportButton filename="motoboys-semana" rows={rows} />
+            <button
+              className="btn-primary"
+              onClick={() => {
+                setEditando(null);
+                setModal(true);
+              }}
+            >
+              <Plus size={17} />
+              Novo motoboy
+            </button>
+          </div>
+        }
+      />
+      <section className="card mb-5 grid items-end gap-4 md:grid-cols-[1fr_1fr_auto]">
+        <label>
+          <span className="label">Data inicial</span>
+          <input
+            className="input"
+            type="date"
+            value={inicio}
+            onChange={(e) => setInicio(e.target.value)}
+          />
+        </label>
+        <label>
+          <span className="label">Data final</span>
+          <input
+            className="input"
+            type="date"
+            value={fim}
+            onChange={(e) => setFim(e.target.value)}
+          />
+        </label>
+        <div className="flex h-11 items-center gap-2 rounded-xl bg-orange-50 px-4 text-sm font-semibold text-primary">
+          <CalendarDays size={18} />
+          {inicio.split("-").reverse().join("/")} —{" "}
+          {fim.split("-").reverse().join("/")}
+        </div>
+      </section>
+      <section className="mb-5 grid gap-4 sm:grid-cols-3">
+        <div className="card">
+          <p className="metric-label">Ativos</p>
+          <b className="metric-value">{lista.filter((m) => m.ativo).length}</b>
+        </div>
+        <div className="card">
+          <p className="metric-label">Total da semana</p>
+          <b className="metric-value text-primary">
+            {moeda(lista.reduce((s, m) => s + total(m.id), 0))}
+          </b>
+        </div>
+        <div className="card">
+          <p className="metric-label">Pagamentos pendentes</p>
+          <b className="metric-value text-amber-600">
+            {lista.filter((m) => m.statusPagamento === "PENDENTE").length}
+          </b>
+        </div>
+      </section>
+      <TableFilter
+        value={busca}
+        onChange={setBusca}
+        placeholder="Buscar motoboy..."
+      />
+      <div className="table-wrap motoboy-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Motoboy</th>
+              {dias.map((dia) => (
+                <th key={dia}>{dia}</th>
+              ))}
+              <th>Total</th>
+              <th>Pagamento</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtrados.map((m) => (
+              <tr key={m.id}>
+                <td>
+                  <b>{m.nome}</b>
+                  <p className="text-xs text-foreground/45">
+                    PIX: {m.chavePix}
+                  </p>
+                </td>
+                {(jornadas[m.id] || jornadaInicial(m.id)).map((dia, indice) => (
+                  <td key={dias[indice]}>
+                    <div className="min-w-28 space-y-1">
+                      <select
+                        className={`mini-select occurrence-${dia.tipo.toLowerCase()}`}
+                        value={dia.tipo}
+                        onChange={(e) =>
+                          atualizarDia(m.id, indice, {
+                            tipo: e.target.value as Ocorrencia,
+                          })
+                        }
+                      >
+                        {ocorrencias.map((opcao) => (
+                          <option key={opcao}>{opcao}</option>
+                        ))}
+                      </select>
+                      {dia.tipo === "TRABALHOU" && (
+                        <input
+                          aria-label={`Valor de ${dias[indice]}`}
+                          className="mini-input"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={dia.valor}
+                          onChange={(e) =>
+                            atualizarDia(m.id, indice, {
+                              valor: Number(e.target.value),
+                            })
+                          }
+                        />
+                      )}
+                    </div>
+                  </td>
+                ))}
+                <td className="font-bold text-primary">{moeda(total(m.id))}</td>
+                <td>
+                  <StatusBadge status={m.statusPagamento} />
+                </td>
+                <td>
+                  <div className="flex gap-1">
+                    <button
+                      aria-label="Editar"
+                      className="icon-action"
+                      onClick={() => {
+                        setEditando(m);
+                        setModal(true);
+                      }}
+                    >
+                      <Pencil />
+                    </button>
+                    <button
+                      aria-label="Marcar como pago"
+                      className="icon-action"
+                      onClick={() => marcarPago(m.id)}
+                    >
+                      <CheckCircle2 />
+                    </button>
+                    <button
+                      aria-label="Excluir"
+                      className="icon-action text-red-600"
+                      onClick={() =>
+                        confirm("Excluir motoboy?") &&
+                        setLista((atual) =>
+                          atual.filter((item) => item.id !== m.id),
+                        )
+                      }
+                    >
+                      <Trash2 />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {modal && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
+          <form onSubmit={salvar} className="card w-full max-w-2xl">
+            <div className="mb-5 flex justify-between">
+              <h2 className="text-xl font-bold">
+                {editando ? "Editar" : "Novo"} motoboy
+              </h2>
+              <button type="button" onClick={() => setModal(false)}>
+                <X />
+              </button>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[
+                ["nome", "Nome", editando?.nome],
+                ["telefone", "Telefone", editando?.telefone],
+                ["pix", "Chave PIX", editando?.chavePix],
+                ["diaria", "Valor da diária", editando?.valorDiaria],
+              ].map(([nome, label, valor]) => (
+                <label key={String(nome)}>
+                  <span className="label">{label}</span>
+                  <input
+                    className="input"
+                    name={String(nome)}
+                    defaultValue={valor}
+                    type={nome === "diaria" ? "number" : "text"}
+                    step="0.01"
+                    required
+                  />
+                </label>
+              ))}
+            </div>
+            <button className="btn-primary mt-6">Salvar cadastro</button>
+          </form>
+        </div>
+      )}
+    </>
+  );
+}

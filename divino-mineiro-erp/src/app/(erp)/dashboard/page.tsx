@@ -1,5 +1,269 @@
 "use client";
-import Link from "next/link";import { useRouter } from "next/navigation";import { useState } from "react";import { AlertTriangle,Banknote,ShoppingCart,UsersRound } from "lucide-react";import { Bar,BarChart,CartesianGrid,Cell,Legend,Line,LineChart,Pie,PieChart,ResponsiveContainer,Tooltip,XAxis,YAxis } from "recharts";import { contasPagarMock,registrosDiariaMock,solicitacoesMock } from "@/lib/mock-data";import { moeda } from "@/lib/utils";
-const cards=[{t:"Contas pendentes",v:moeda(contasPagarMock.filter(c=>c.status==="PENDENTE").reduce((s,c)=>s+c.valor,0)),i:Banknote,c:"text-amber-600",l:"/contas"},{t:"Boletos vencidos",v:String(contasPagarMock.filter(c=>c.status==="VENCIDO").length),i:AlertTriangle,c:"text-red-600",l:"/contas"},{t:"Diárias pendentes",v:String(registrosDiariaMock.filter(r=>r.status!=="PAGO").length),i:UsersRound,c:"text-blue-600",l:"/diaristas"},{t:"Aguardando aprovação",v:String(solicitacoesMock.filter(s=>s.status==="AGUARDANDO_APROVACAO").length),i:ShoppingCart,c:"text-purple-600",l:"/compras"}];
-const dados=[{nome:"Pago",valor:3480.25,cor:"#2f855a"},{nome:"Pendente",valor:19752.05,cor:"#e4a72c"}];
-export default function Dashboard(){const router=useRouter();const [periodo,setPeriodo]=useState("7"),[tipo,setTipo]=useState("barras");const chart=tipo==="pizza"?<PieChart onClick={()=>router.push(`/relatorios?periodo=${periodo}`)}><Pie data={dados} dataKey="valor" nameKey="nome" cx="50%" cy="50%" outerRadius={90}>{dados.map(d=><Cell key={d.nome} fill={d.cor}/>)}</Pie><Tooltip formatter={v=>moeda(Number(v))}/><Legend/></PieChart>:tipo==="linha"?<LineChart data={dados} onClick={()=>router.push(`/relatorios?periodo=${periodo}`)}><CartesianGrid strokeDasharray="3 3"/><XAxis dataKey="nome"/><YAxis/><Tooltip formatter={v=>moeda(Number(v))}/><Line dataKey="valor" stroke="#2f855a" strokeWidth={3}/></LineChart>:<BarChart data={dados} onClick={()=>router.push(`/relatorios?periodo=${periodo}`)}><CartesianGrid strokeDasharray="3 3"/><XAxis dataKey="nome"/><YAxis/><Tooltip formatter={v=>moeda(Number(v))}/><Bar dataKey="valor" radius={[8,8,0,0]}>{dados.map(d=><Cell key={d.nome} fill={d.cor}/>)}</Bar></BarChart>;return <><div className="mb-6"><p className="text-sm font-semibold text-gold">VISÃO OPERACIONAL</p><h1 className="mt-1 text-3xl font-bold">Bom dia!</h1><p className="text-foreground/55">Aqui está o resumo mais importante do restaurante.</p></div><section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{cards.map(({t,v,i:Icon,c,l})=><Link href={l} className="card transition hover:-translate-y-0.5" key={t}><div className="flex items-start justify-between"><div><p className="text-sm text-foreground/55">{t}</p><p className="mt-2 text-2xl font-bold">{v}</p></div><span className={`rounded-xl bg-muted p-2.5 ${c}`}><Icon size={20}/></span></div></Link>)}</section><section className="card mt-6"><div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-bold">Valores pagos x pendentes</h2><p className="text-sm text-foreground/50">Clique no gráfico para abrir o relatório detalhado.</p></div><div className="flex flex-wrap gap-2"><select className="input h-9 w-auto" value={periodo} onChange={e=>setPeriodo(e.target.value)}><option value="1">Último dia</option><option value="7">Últimos 7 dias</option><option value="30">Últimos 30 dias</option></select><select className="input h-9 w-auto" value={tipo} onChange={e=>setTipo(e.target.value)}><option value="barras">Barras</option><option value="pizza">Pizza</option><option value="linha">Linha</option></select></div></div><div className="h-80 cursor-pointer"><ResponsiveContainer width="100%" height="100%">{chart}</ResponsiveContainer></div></section></>}
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import {
+  AlertTriangle,
+  Banknote,
+  Bike,
+  ClipboardList,
+  ShoppingCart,
+  UsersRound,
+} from "lucide-react";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  contasPagarMock,
+  motoboysMock,
+  registrosDiariaMock,
+  solicitacoesMock,
+  tarefasMock,
+} from "@/lib/mock-data";
+import { moeda } from "@/lib/utils";
+
+const pagos = [
+  { nome: "Seg", valor: 900 },
+  { nome: "Ter", valor: 1580 },
+  { nome: "Qua", valor: 0 },
+  { nome: "Qui", valor: 3480 },
+  { nome: "Sex", valor: 1200 },
+  { nome: "Sáb", valor: 0 },
+];
+const pendentes = [
+  { nome: "Seg", valor: 4825 },
+  { nome: "Ter", valor: 2100 },
+  { nome: "Qua", valor: 11240 },
+  { nome: "Qui", valor: 0 },
+  { nome: "Sex", valor: 3687 },
+  { nome: "Sáb", valor: 900 },
+];
+const ganhosMotoboys = [
+  { nome: "Luiz", valor: 286.8 },
+  { nome: "Alemão", valor: 270.5 },
+  { nome: "Nikolas", valor: 229.4 },
+  { nome: "Nelber", valor: 169.5 },
+];
+const fornecedores = [
+  { nome: "Boi Manso", valor: 112400 },
+  { nome: "Serra Verde", valor: 48250 },
+  { nome: "Vale Águas", valor: 36870 },
+];
+
+function Financeiro({
+  titulo,
+  total,
+  dados,
+  cor,
+  rota,
+}: {
+  titulo: string;
+  total: number;
+  dados: typeof pagos;
+  cor: string;
+  rota: string;
+}) {
+  const router = useRouter();
+  return (
+    <article className="card">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="metric-label">No período</p>
+          <h2 className="font-bold">{titulo}</h2>
+        </div>
+        <b style={{ color: cor }}>{moeda(total)}</b>
+      </div>
+      <div className="mt-2 h-32 cursor-pointer">
+        <ResponsiveContainer>
+          <AreaChart data={dados} onClick={() => router.push(rota)}>
+            <defs>
+              <linearGradient id={`g-${titulo}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={cor} stopOpacity={0.3} />
+                <stop offset="95%" stopColor={cor} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis dataKey="nome" tickLine={false} />
+            <YAxis hide />
+            <Tooltip formatter={(v) => moeda(Number(v))} />
+            <Area
+              type="monotone"
+              dataKey="valor"
+              stroke={cor}
+              strokeWidth={2.5}
+              fill={`url(#g-${titulo})`}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </article>
+  );
+}
+
+export default function Dashboard() {
+  const [periodo, setPeriodo] = useState("7");
+  const cards = [
+    [
+      "Contas pendentes",
+      moeda(
+        contasPagarMock
+          .filter((c) => c.status === "PENDENTE")
+          .reduce((s, c) => s + c.valor, 0),
+      ),
+      Banknote,
+      "/contas",
+    ],
+    [
+      "Boletos vencidos",
+      String(contasPagarMock.filter((c) => c.status === "VENCIDO").length),
+      AlertTriangle,
+      "/contas",
+    ],
+    [
+      "Diárias pendentes",
+      String(registrosDiariaMock.filter((r) => r.status !== "PAGO").length),
+      UsersRound,
+      "/diaristas",
+    ],
+    [
+      "Solicitações abertas",
+      String(
+        solicitacoesMock.filter(
+          (s) => !["FINALIZADA", "REPROVADA"].includes(s.status),
+        ).length,
+      ),
+      ShoppingCart,
+      "/compras",
+    ],
+    [
+      "Motoboys pendentes",
+      String(
+        motoboysMock.filter((m) => m.statusPagamento === "PENDENTE").length,
+      ),
+      Bike,
+      "/motoboys",
+    ],
+    [
+      "Tarefas a fazer",
+      String(tarefasMock.filter((t) => t.status !== "CONCLUIDA").length),
+      ClipboardList,
+      "/tarefas",
+    ],
+  ] as const;
+  return (
+    <>
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[.2em] text-primary">
+            Visão operacional
+          </p>
+          <h1 className="mt-1 text-3xl font-bold">Bom dia!</h1>
+          <p className="text-foreground/55">
+            Resumo financeiro e operacional do restaurante.
+          </p>
+        </div>
+        <select
+          className="input w-auto"
+          value={periodo}
+          onChange={(e) => setPeriodo(e.target.value)}
+        >
+          <option value="1">Último dia</option>
+          <option value="7">Últimos 7 dias</option>
+          <option value="30">Últimos 30 dias</option>
+        </select>
+      </div>
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {cards.map(([titulo, valor, Icon, rota]) => (
+          <Link href={rota} className="dashboard-card" key={titulo}>
+            <span className="dashboard-icon">
+              <Icon size={19} />
+            </span>
+            <div>
+              <p className="metric-label">{titulo}</p>
+              <b className="text-xl">{valor}</b>
+            </div>
+          </Link>
+        ))}
+      </section>
+      <section className="mt-5 grid gap-5 xl:grid-cols-2">
+        <Financeiro
+          titulo="Valores pagos"
+          total={pagos.reduce((s, d) => s + d.valor, 0)}
+          dados={pagos}
+          cor="#2f8b61"
+          rota={`/relatorios?secao=contas&periodo=${periodo}&status=pago`}
+        />
+        <Financeiro
+          titulo="Valores pendentes"
+          total={pendentes.reduce((s, d) => s + d.valor, 0)}
+          dados={pendentes}
+          cor="#e97924"
+          rota={`/relatorios?secao=contas&periodo=${periodo}&status=pendente`}
+        />
+      </section>
+      <section className="mt-5 grid gap-5 xl:grid-cols-2">
+        <article className="card">
+          <div className="mb-3">
+            <h2 className="font-bold">Motoboys com maior valor</h2>
+            <p className="metric-label">
+              Comparativo dos últimos {periodo} dias
+            </p>
+          </div>
+          <div className="h-56">
+            <ResponsiveContainer>
+              <BarChart data={ganhosMotoboys} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                <XAxis type="number" hide />
+                <YAxis
+                  type="category"
+                  dataKey="nome"
+                  width={70}
+                  tickLine={false}
+                />
+                <Tooltip formatter={(v) => moeda(Number(v))} />
+                <Bar
+                  dataKey="valor"
+                  fill="#e97924"
+                  radius={[0, 7, 7, 0]}
+                  maxBarSize={18}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </article>
+        <article className="card">
+          <div className="mb-3">
+            <h2 className="font-bold">Fornecedores mais pagos</h2>
+            <p className="metric-label">
+              Ajuda a identificar concentração de compras
+            </p>
+          </div>
+          <div className="h-56">
+            <ResponsiveContainer>
+              <BarChart data={fornecedores}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="nome" tickLine={false} />
+                <YAxis hide />
+                <Tooltip formatter={(v) => moeda(Number(v))} />
+                <Bar
+                  dataKey="valor"
+                  fill="#9b3f15"
+                  radius={[7, 7, 0, 0]}
+                  maxBarSize={24}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </article>
+      </section>
+    </>
+  );
+}

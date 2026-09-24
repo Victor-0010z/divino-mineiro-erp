@@ -39,10 +39,10 @@ export const tarefasMock: Tarefa[] = [
   { id:"t4", titulo:"Revisar manutenção das coifas", responsavelNome:"Carlos Andrade", categoria:"Manutenção", prioridade:"URGENTE", prazo:"2026-09-19", status:"PENDENTE" }
 ];
 export const motoboysMock: Motoboy[] = [
-  {id:"m1",nome:"Alemão",telefone:"(11) 98888-1101",chavePix:"11988881101",valorDiaria:90,valorSemanal:0,valorFrete:8.5,ativo:true,statusPagamento:"PENDENTE"},
-  {id:"m2",nome:"Luiz",telefone:"(11) 98888-1102",chavePix:"luiz@email.com",valorDiaria:90,valorSemanal:0,valorFrete:8.5,ativo:true,statusPagamento:"PENDENTE"},
-  {id:"m3",nome:"Nelber",telefone:"(11) 98888-1103",chavePix:"11988881103",valorDiaria:90,valorSemanal:0,valorFrete:8.5,ativo:true,statusPagamento:"PAGO"},
-  {id:"m4",nome:"Nikolas",telefone:"(11) 98888-1104",chavePix:"11988881104",valorDiaria:90,valorSemanal:0,valorFrete:8.5,ativo:true,statusPagamento:"PENDENTE"}
+  {id:"m1",nome:"Alemão",telefone:"(11) 98888-1101",chavePix:"11988881101",valorDiaria:90,ativo:true,statusPagamento:"PENDENTE"},
+  {id:"m2",nome:"Luiz",telefone:"(11) 98888-1102",chavePix:"luiz@email.com",valorDiaria:90,ativo:true,statusPagamento:"PENDENTE"},
+  {id:"m3",nome:"Nelber",telefone:"(11) 98888-1103",chavePix:"11988881103",valorDiaria:90,ativo:true,statusPagamento:"PAGO"},
+  {id:"m4",nome:"Nikolas",telefone:"(11) 98888-1104",chavePix:"11988881104",valorDiaria:90,ativo:true,statusPagamento:"PENDENTE"}
 ];
 export const jornadasMotoboyMock: JornadaMotoboy[] = [
   {motoboyId:"m1",valores:[156.5,0,114,0,0,0],folgas:[1],fretes:[8,0,3,0,0,0]},

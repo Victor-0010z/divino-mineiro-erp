@@ -10,5 +10,5 @@ export interface RegistroDiaria { id:string; diaristaId:string; dataTrabalhada:s
 export interface PagamentoDiarista { id:string; diaristaId:string; diaristaNome:string; diariasIncluidas:string[]; valorTotal:number; chavePix:string; dataPagamento?:string; status:"PENDENTE"|"PAGO"|"ATRASADO"|"CANCELADO"; criadoEm:string }
 export interface Solicitacao { id:string; numero:string; produto:string; fornecedorNome:string; solicitanteNome:string; dataNecessaria:string; valorTotal:number; prioridade:"BAIXA"|"MEDIA"|"ALTA"|"URGENTE"; status:string }
 export interface Tarefa { id:string; titulo:string; responsavelNome:string; categoria:string; prioridade:"BAIXA"|"MEDIA"|"ALTA"|"URGENTE"; prazo:string; status:StatusTarefa }
-export interface Motoboy { id:string; nome:string; telefone:string; chavePix:string; valorDiaria:number; valorSemanal:number; valorFrete:number; ativo:boolean; statusPagamento:"PENDENTE"|"PAGO" }
+export interface Motoboy { id:string; nome:string; telefone:string; chavePix:string; valorDiaria:number; ativo:boolean; statusPagamento:"PENDENTE"|"PAGO" }
 export interface JornadaMotoboy { motoboyId:string; valores:number[]; folgas:number[]; fretes:number[] }

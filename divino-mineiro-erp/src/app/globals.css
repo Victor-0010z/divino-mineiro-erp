@@ -43,8 +43,8 @@
   .sidebar-scroll::-webkit-scrollbar { width:8px; }
   .sidebar-scroll::-webkit-scrollbar-track { background:#ffeadb; }
   .sidebar-scroll::-webkit-scrollbar-thumb { background:hsl(var(--primary)); border-radius:999px; border:2px solid #ffeadb; }
-  .notification-button { @apply relative grid h-10 w-10 place-items-center rounded-full border-0 bg-primary text-white shadow-lg transition active:scale-90; }
-  .notification-button:hover { background:#bd4911; }
+  .notification-button { @apply relative grid h-10 w-10 place-items-center rounded-full border-0 bg-white text-primary shadow-lg transition active:scale-90; }
+  .notification-button:hover { background:#fff3e9; }
   .notification-button:hover .bell { animation:bell-ring .9s both; }
   .save-button { --save-color:145 42% 22%; --save-ease:cubic-bezier(.5,0,.25,1); @apply btn border border-primary bg-primary text-white; overflow:visible; }
   .save-button svg { width:22px; height:22px; overflow:visible; }

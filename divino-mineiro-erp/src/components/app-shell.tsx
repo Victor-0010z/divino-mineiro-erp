@@ -55,8 +55,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   const nav = (
     <>
-      <div className="flex h-24 items-center border-b px-4">
-        <span className="relative h-16 w-40">
+      <div className="flex h-16 items-center border-b border-orange-700 bg-primary px-4">
+        <span className="relative h-11 w-32">
           <Image
             src="/divino-logo.png"
             alt="Logo Divino Mineiro"
@@ -64,7 +64,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             className="object-contain object-left"
           />
         </span>
-        <button className="ml-auto lg:hidden" onClick={() => setMenu(false)}>
+        <button className="ml-auto text-white lg:hidden" onClick={() => setMenu(false)}>
           <X />
         </button>
       </div>
@@ -140,8 +140,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       )}
       <div className="min-w-0">
-        <header className="sticky top-0 z-30 flex h-16 items-center border-b bg-background/90 px-4 backdrop-blur md:px-7">
-          <button onClick={() => setMenu(true)} className="mr-3 lg:hidden">
+        <header className="sticky top-0 z-30 flex h-16 items-center border-b border-orange-700 bg-primary px-4 md:px-7">
+          <button onClick={() => setMenu(true)} className="mr-3 text-white lg:hidden">
             <Menu />
           </button>
           <span className="relative h-11 w-32">

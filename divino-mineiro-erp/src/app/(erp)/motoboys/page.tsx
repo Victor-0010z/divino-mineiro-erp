@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from "react";
 import {
-  CalendarDays,
-  CheckCircle2,
+  CalendarCheck2,
   Pencil,
   Plus,
   Trash2,
@@ -13,9 +12,13 @@ import { motoboysMock, jornadasMotoboyMock } from "@/lib/mock-data";
 import type { Motoboy } from "@/types";
 import { moeda } from "@/lib/utils";
 import { PageHeading } from "@/components/page-heading";
-import { StatusBadge } from "@/components/status-badge";
 import { DownloadReportButton } from "@/components/download-report-button";
 import { TableFilter } from "@/components/table-filter";
+import {
+  lerFechamentosMotoboys,
+  salvarFechamentosMotoboys,
+  type StatusPagamentoMotoboy,
+} from "@/lib/motoboy-history";
 
 const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 const ocorrencias = [
@@ -27,6 +30,20 @@ const ocorrencias = [
 ] as const;
 type Ocorrencia = (typeof ocorrencias)[number];
 type Dia = { tipo: Ocorrencia; valor: number };
+
+function semanaAtual() {
+  const hoje = new Date();
+  const dia = hoje.getDay();
+  const segunda = new Date(hoje);
+  segunda.setDate(hoje.getDate() - (dia === 0 ? 6 : dia - 1));
+  const sabado = new Date(segunda);
+  sabado.setDate(segunda.getDate() + 5);
+  const iso = (data: Date) => {
+    const local = new Date(data.getTime() - data.getTimezoneOffset() * 60_000);
+    return local.toISOString().slice(0, 10);
+  };
+  return { inicio: iso(segunda), fim: iso(sabado) };
+}
 
 function jornadaInicial(motoboyId: string): Dia[] {
   const jornada = jornadasMotoboyMock.find(
@@ -44,8 +61,7 @@ export default function Motoboys() {
     Object.fromEntries(motoboysMock.map((m) => [m.id, jornadaInicial(m.id)])),
   );
   const [busca, setBusca] = useState("");
-  const [inicio, setInicio] = useState("2026-09-21");
-  const [fim, setFim] = useState("2026-09-26");
+  const [{ inicio, fim }] = useState(semanaAtual);
   const [modal, setModal] = useState(false);
   const [editando, setEditando] = useState<Motoboy | null>(null);
   const filtrados = useMemo(
@@ -82,22 +98,35 @@ export default function Motoboys() {
     );
   }
 
-  function marcarPago(id: string) {
-    if (
-      !confirm(
-        "Confirmar o pagamento? Os lançamentos desta semana serão zerados.",
-      )
-    )
-      return;
+  function mudarPagamento(id: string, statusPagamento: StatusPagamentoMotoboy) {
     setLista((atual) =>
       atual.map((item) =>
-        item.id === id ? { ...item, statusPagamento: "PAGO" } : item,
+        item.id === id ? { ...item, statusPagamento } : item,
       ),
     );
+  }
+
+  function fecharSemana() {
+    if (!confirm(`Fechar a semana de ${inicio.split("-").reverse().join("/")} a ${fim.split("-").reverse().join("/")}? Os lançamentos serão enviados aos relatórios e esta tela será zerada.`)) return;
+    const fechamento = {
+      id: crypto.randomUUID(),
+      inicio,
+      fim,
+      fechadoEm: new Date().toISOString(),
+      itens: lista.map((motoboy) => ({
+        motoboyId: motoboy.id,
+        nome: motoboy.nome,
+        chavePix: motoboy.chavePix,
+        valor: total(motoboy.id),
+        status: motoboy.statusPagamento,
+      })),
+    };
+    salvarFechamentosMotoboys([fechamento, ...lerFechamentosMotoboys()]);
     setJornadas((atual) => ({
-      ...atual,
-      [id]: dias.map(() => ({ tipo: "TRABALHOU", valor: 0 })),
+      ...Object.fromEntries(Object.keys(atual).map((id) => [id, dias.map(() => ({ tipo: "TRABALHOU" as const, valor: 0 }))])),
     }));
+    setLista((atual) => atual.map((item) => ({ ...item, statusPagamento: "PENDENTE" })));
+    alert("Semana fechada e enviada para Relatórios > Motoboys.");
   }
 
   function salvar(evento: React.FormEvent<HTMLFormElement>) {
@@ -159,31 +188,10 @@ export default function Motoboys() {
           </div>
         }
       />
-      <section className="card mb-5 grid items-end gap-4 md:grid-cols-[1fr_1fr_auto]">
-        <label>
-          <span className="label">Data inicial</span>
-          <input
-            className="input"
-            type="date"
-            value={inicio}
-            onChange={(e) => setInicio(e.target.value)}
-          />
-        </label>
-        <label>
-          <span className="label">Data final</span>
-          <input
-            className="input"
-            type="date"
-            value={fim}
-            onChange={(e) => setFim(e.target.value)}
-          />
-        </label>
-        <div className="flex h-11 items-center gap-2 rounded-xl bg-orange-50 px-4 text-sm font-semibold text-primary">
-          <CalendarDays size={18} />
-          {inicio.split("-").reverse().join("/")} —{" "}
-          {fim.split("-").reverse().join("/")}
-        </div>
-      </section>
+      <div className="mb-5 flex items-center gap-2 rounded-xl bg-orange-50 px-4 py-3 text-sm font-semibold text-primary">
+        <CalendarCheck2 size={18} />
+        Semana atual: {inicio.split("-").reverse().join("/")} — {fim.split("-").reverse().join("/")}
+      </div>
       <section className="mb-5 grid gap-4 sm:grid-cols-3">
         <div className="card">
           <p className="metric-label">Ativos</p>
@@ -265,7 +273,15 @@ export default function Motoboys() {
                 ))}
                 <td className="font-bold text-primary">{moeda(total(m.id))}</td>
                 <td>
-                  <StatusBadge status={m.statusPagamento} />
+                  <select
+                    aria-label={`Pagamento de ${m.nome}`}
+                    className={`mini-select payment-${m.statusPagamento.toLowerCase()}`}
+                    value={m.statusPagamento}
+                    onChange={(e) => mudarPagamento(m.id, e.target.value as StatusPagamentoMotoboy)}
+                  >
+                    <option value="PENDENTE">Pendente</option>
+                    <option value="PAGO">Pago</option>
+                  </select>
                 </td>
                 <td>
                   <div className="flex gap-1">
@@ -278,13 +294,6 @@ export default function Motoboys() {
                       }}
                     >
                       <Pencil />
-                    </button>
-                    <button
-                      aria-label="Marcar como pago"
-                      className="icon-action"
-                      onClick={() => marcarPago(m.id)}
-                    >
-                      <CheckCircle2 />
                     </button>
                     <button
                       aria-label="Excluir"
@@ -305,6 +314,13 @@ export default function Motoboys() {
           </tbody>
         </table>
       </div>
+      <section className="mt-5 rounded-2xl border border-orange-200 bg-orange-50 p-5 text-center">
+        <p className="mb-3 text-sm text-foreground/65">Ao fechar, os valores e pagamentos desta semana serão guardados no histórico e os campos voltarão a zero.</p>
+        <button className="btn-primary h-12 w-full text-base" onClick={fecharSemana}>
+          <CalendarCheck2 size={19} />
+          Fechar a semana
+        </button>
+      </section>
       {modal && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
           <form onSubmit={salvar} className="card w-full max-w-2xl">

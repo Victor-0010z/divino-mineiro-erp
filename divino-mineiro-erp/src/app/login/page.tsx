@@ -27,12 +27,12 @@ export default function LoginPage() {
   return (
     <main className="grid min-h-screen lg:grid-cols-[1.15fr_.85fr]">
       <section className="login-brand relative hidden overflow-hidden p-12 text-white lg:flex lg:flex-col lg:justify-between">
-        <div className="relative h-32 w-80">
+        <div className="relative mx-auto h-32 w-80">
           <Image
             src="/divino-logo.png"
             alt="Logo Divino Mineiro"
             fill
-            className="object-contain object-left"
+            className="object-contain object-center"
           />
         </div>
         <div className="relative max-w-xl">
@@ -52,12 +52,12 @@ export default function LoginPage() {
       </section>
       <section className="flex items-center justify-center p-6">
         <form onSubmit={entrar} className="w-full max-w-md">
-          <div className="relative mb-7 h-24 w-56 lg:hidden">
+          <div className="relative mx-auto mb-7 h-24 w-56 lg:hidden">
             <Image
               src="/divino-logo.png"
               alt="Logo Divino Mineiro"
               fill
-              className="object-contain object-left"
+              className="object-contain object-center"
             />
           </div>
           <p className="text-sm font-semibold text-primary">

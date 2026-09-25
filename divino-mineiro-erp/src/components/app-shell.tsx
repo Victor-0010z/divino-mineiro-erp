@@ -26,6 +26,7 @@ import {
   type SessaoUsuario,
 } from "@/lib/services/auth-service";
 import { cn, iniciais } from "@/lib/utils";
+import { TimeCloudCard } from "@/components/time-cloud-card";
 const itens = [
   ["/dashboard", "Visão geral", LayoutDashboard],
   ["/contas", "Contas a pagar", ReceiptText],
@@ -55,16 +56,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   const nav = (
     <>
-      <div className="flex h-16 items-center border-b border-orange-700 bg-primary px-4">
-        <span className="relative h-11 w-32">
+      <div className="flex h-16 items-center justify-center border-b border-orange-700 bg-primary px-4">
+        <span className="relative h-9 w-28">
           <Image
             src="/divino-logo.png"
             alt="Logo Divino Mineiro"
             fill
-            className="object-contain object-left"
+            className="object-contain object-center"
           />
         </span>
-        <button className="ml-auto text-white lg:hidden" onClick={() => setMenu(false)}>
+        <button className="absolute right-4 text-white lg:hidden" onClick={() => setMenu(false)}>
           <X />
         </button>
       </div>
@@ -144,17 +145,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <button onClick={() => setMenu(true)} className="mr-3 text-white lg:hidden">
             <Menu />
           </button>
-          <span className="relative h-11 w-32">
-            <Image
-              src="/divino-logo.png"
-              alt="Logo Divino Mineiro"
-              fill
-              className="object-contain object-left"
-            />
-          </span>
+          <div className="ml-auto mr-3 hidden sm:block"><TimeCloudCard /></div>
           <button
             aria-label="Notificações"
-            className="notification-button ml-auto"
+            className="notification-button"
           >
             <Bell className="bell" size={18} />
             <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />

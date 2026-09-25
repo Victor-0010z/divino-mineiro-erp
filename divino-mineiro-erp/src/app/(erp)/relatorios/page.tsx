@@ -1,7 +1,8 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Bike,
+  CalendarRange,
   FileClock,
   ListTodo,
   Printer,
@@ -21,6 +22,7 @@ import {
 import { moeda } from "@/lib/utils";
 import { PageHeading } from "@/components/page-heading";
 import { DownloadReportButton } from "@/components/download-report-button";
+import { lerFechamentosMotoboys, type MotoboyFechamento } from "@/lib/motoboy-history";
 
 const secoes = [
   { id: "contas", nome: "Contas a pagar", icon: ReceiptText },
@@ -36,7 +38,14 @@ export default function Relatorios() {
   const [secao, setSecao] = useState("contas"),
     [busca, setBusca] = useState(""),
     [inicio, setInicio] = useState("2026-09-01"),
-    [fim, setFim] = useState("2026-09-30");
+    [fim, setFim] = useState("2026-09-30"),
+    [inicioRascunho, setInicioRascunho] = useState(inicio),
+    [fimRascunho, setFimRascunho] = useState(fim),
+    [calendarioAberto, setCalendarioAberto] = useState(false),
+    [fechamentos, setFechamentos] = useState<MotoboyFechamento[]>([]);
+
+  useEffect(() => setFechamentos(lerFechamentosMotoboys()), []);
+
   const linhas = useMemo(() => {
     const q = busca.toLowerCase();
     if (secao === "contas")
@@ -73,16 +82,26 @@ export default function Relatorios() {
           moeda(i.valorPadraoDiaria),
           i.ativo ? "ATIVO" : "INATIVO",
         ]);
-    if (secao === "motoboys")
-      return motoboysMock
-        .filter((i) => i.nome.toLowerCase().includes(q))
-        .map((i) => [
-          i.nome,
-          i.chavePix,
-          "Semana",
-          moeda(i.valorDiaria),
-          i.statusPagamento,
+    if (secao === "motoboys") {
+      const noPeriodo = fechamentos.filter((fechamento) => fechamento.fim >= inicio && fechamento.inicio <= fim);
+      const somados = new Map<string, { nome: string; pix: string; valor: number; pagos: number; pendentes: number }>();
+      noPeriodo.forEach((fechamento) => fechamento.itens.forEach((item) => {
+        const atual = somados.get(item.motoboyId) || { nome: item.nome, pix: item.chavePix, valor: 0, pagos: 0, pendentes: 0 };
+        atual.valor += item.valor;
+        if (item.status === "PAGO") atual.pagos += 1;
+        else atual.pendentes += 1;
+        somados.set(item.motoboyId, atual);
+      }));
+      return [...somados.values()]
+        .filter((item) => (item.nome + item.pix).toLowerCase().includes(q))
+        .map((item) => [
+          item.nome,
+          item.pix,
+          `${inicio.split("-").reverse().join("/")} a ${fim.split("-").reverse().join("/")}`,
+          moeda(item.valor),
+          item.pendentes === 0 ? "PAGO" : item.pagos === 0 ? "PENDENTE" : `PARCIAL (${item.pagos} pago / ${item.pendentes} pendente)`,
         ]);
+    }
     if (secao === "fornecedores")
       return fornecedoresMock
         .filter((i) => i.nomeFantasia.toLowerCase().includes(q))
@@ -123,7 +142,7 @@ export default function Relatorios() {
         "REGISTRADO",
       ],
     ];
-  }, [secao, busca]);
+  }, [secao, busca, inicio, fim, fechamentos]);
   const nomeSecao = secoes.find((s) => s.id === secao)?.nome || "Relatório";
   const rows = [
     ["Nome / descrição", "Referência", "Data / tipo", "Valor / ação", "Status"],
@@ -161,31 +180,35 @@ export default function Relatorios() {
           ))}
         </aside>
         <section>
-          <div className="card mb-5 grid gap-3 md:grid-cols-[1fr_170px_170px]">
+          <div className="card relative z-20 mb-5 grid gap-3 md:grid-cols-[1fr_310px]">
             <input
               className="input"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               placeholder={`Filtrar em ${nomeSecao.toLowerCase()}...`}
             />
-            <label>
-              <span className="sr-only">Data inicial</span>
-              <input
-                className="input"
-                type="date"
-                value={inicio}
-                onChange={(e) => setInicio(e.target.value)}
-              />
-            </label>
-            <label>
-              <span className="sr-only">Data final</span>
-              <input
-                className="input"
-                type="date"
-                value={fim}
-                onChange={(e) => setFim(e.target.value)}
-              />
-            </label>
+            <div className="relative">
+              <button className="date-range-trigger" onClick={() => setCalendarioAberto((aberto) => !aberto)}>
+                <CalendarRange size={18} />
+                <span>{inicio.split("-").reverse().join("/")} — {fim.split("-").reverse().join("/")}</span>
+              </button>
+              {calendarioAberto && (
+                <div className="date-range-popover">
+                  <p className="mb-3 font-semibold">Escolha o período</p>
+                  <label><span className="label">Data inicial</span><input className="input" type="date" value={inicioRascunho} onChange={(e) => setInicioRascunho(e.target.value)} /></label>
+                  <label><span className="label mt-3">Data final</span><input className="input" type="date" min={inicioRascunho} value={fimRascunho} onChange={(e) => setFimRascunho(e.target.value)} /></label>
+                  <button
+                    className="btn-primary mt-4 w-full"
+                    onClick={() => {
+                      if (fimRascunho < inicioRascunho) return alert("A data final precisa ser posterior à data inicial.");
+                      setInicio(inicioRascunho);
+                      setFim(fimRascunho);
+                      setCalendarioAberto(false);
+                    }}
+                  >Aplicar período</button>
+                </div>
+              )}
+            </div>
           </div>
           <div className="mb-3 flex items-end justify-between">
             <div>

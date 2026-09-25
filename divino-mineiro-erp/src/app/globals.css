@@ -35,6 +35,8 @@
   .occurrence-faltou { @apply border-red-200 bg-red-50 text-red-700; }
   .occurrence-feriado { @apply border-purple-200 bg-purple-50 text-purple-700; }
   .occurrence-atestado { @apply border-amber-200 bg-amber-50 text-amber-700; }
+  .payment-pago { @apply border-green-200 bg-green-50 font-semibold text-green-700; }
+  .payment-pendente { @apply border-amber-200 bg-amber-50 font-semibold text-amber-700; }
   .report-nav { @apply flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-foreground/65 transition hover:bg-orange-50 hover:text-primary; }
   .report-nav.active { @apply bg-primary text-white; }
   .login-brand { background:radial-gradient(circle at 85% 15%,rgba(244,130,32,.45),transparent 35%),linear-gradient(145deg,#1a100b 0%,#6e2b0c 55%,#d75d16 100%); }
@@ -46,6 +48,25 @@
   .notification-button { @apply relative grid h-10 w-10 place-items-center rounded-full border-0 bg-white text-primary shadow-lg transition active:scale-90; }
   .notification-button:hover { background:#fff3e9; }
   .notification-button:hover .bell { animation:bell-ring .9s both; }
+  .date-range-trigger { @apply flex h-11 w-full items-center justify-center gap-2 rounded-xl border bg-card px-3 text-sm font-semibold text-primary transition hover:bg-orange-50; }
+  .date-range-popover { @apply absolute right-0 top-12 z-50 w-full min-w-72 rounded-2xl border bg-card p-4 shadow-xl; }
+  .time-cloud-placeholder { width:230px; height:48px; }
+  .card-time-cloud { --cloud-color:#ed782a; position:absolute; right:72px; top:8px; z-index:40; width:230px; height:48px; overflow:hidden; border:2px solid var(--cloud-color); border-radius:14px; background:#fff; color:var(--cloud-color); box-shadow:0 5px 18px rgba(76,28,4,.18); transition:height .45s ease,box-shadow .45s ease; }
+  .card-time-cloud:hover { height:220px; box-shadow:0 12px 0 rgba(237,120,42,.35),0 22px 35px rgba(76,28,4,.2); }
+  .card-time-cloud-front { position:absolute; z-index:2; left:50%; top:115%; width:270px; height:175px; transform:translate(-50%,-50%); border-radius:50%; background:#f0ece9; transition:top .45s ease; }
+  .card-time-cloud:hover .card-time-cloud-front { top:108%; }
+  .card-time-cloud-back { position:absolute; inset:0; z-index:1; background:#fff; }
+  .card-time-cloud-back svg { position:absolute; left:-85px; top:-185px; width:310px; color:var(--cloud-color); animation:rotate-cloud 15s linear infinite; }
+  .card-time-cloud-back svg:nth-child(2) { opacity:.35; animation-delay:1s; }
+  .card-time-cloud-day,.card-time-cloud-day-number,.card-time-cloud-hour { position:absolute; z-index:3; margin:0; font-weight:700; transition:all .45s ease; }
+  .card-time-cloud-day { left:12px; top:6px; font-size:13px; }
+  .card-time-cloud-day-number { left:12px; top:25px; font-size:11px; font-weight:600; }
+  .card-time-cloud-hour { right:12px; top:12px; font-size:17px; }
+  .card-time-cloud:hover .card-time-cloud-day { top:58px; font-size:19px; }
+  .card-time-cloud:hover .card-time-cloud-day-number { top:86px; font-size:15px; }
+  .card-time-cloud:hover .card-time-cloud-hour { top:14px; font-size:36px; }
+  .card-time-cloud-icon svg { position:absolute; z-index:4; right:11px; top:53px; width:24px; transition:all .45s ease; }
+  .card-time-cloud:hover .card-time-cloud-icon svg { right:-18px; top:112px; width:100px; transform:rotate(-35deg); }
   .save-button { --save-color:145 42% 22%; --save-ease:cubic-bezier(.5,0,.25,1); @apply btn border border-primary bg-primary text-white; overflow:visible; }
   .save-button svg { width:22px; height:22px; overflow:visible; }
   .save-button:hover { @apply bg-primary/90; }
@@ -68,6 +89,7 @@
   .finish-button:hover span { opacity:1; transform:translateY(34px); }
 }
 @keyframes bell-ring{0%,100%{transform-origin:top}15%{transform:rotate(10deg)}30%{transform:rotate(-10deg)}45%{transform:rotate(5deg)}60%{transform:rotate(-5deg)}75%{transform:rotate(2deg)}}
+@keyframes rotate-cloud{to{transform:rotate(360deg)}}
 @keyframes save-bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-7px)}70%{transform:translateY(2px)}}
 @keyframes has-saved-line-top{33.333%{transform:rotate(0deg) translate(1px,2px) scale(1.75);d:path("M 3 5 L 3 8 L 3 8")}66.666%{transform:rotate(20deg) translate(2px,-2px) scale(.75)}99.999%{transform:rotate(0deg) translate(0,0) scale(1)}}
 @keyframes has-saved-line-bottom{33.333%{transform:rotate(0deg) translate(1px,2px) scale(1.75);d:path("M 17 20 L 17 13 L 7 13 L 7 20")}66.666%{transform:rotate(20deg) translate(2px,-2px) scale(.75)}99.999%{transform:rotate(0deg) translate(0,0) scale(1);d:path("M 17 21 L 17 21 L 7 21 L 7 21")}}

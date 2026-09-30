@@ -36,7 +36,7 @@ const itens = [
   ["/compras", "Solicitações", ShoppingCart],
   ["/tarefas", "Tarefas", ListTodo],
   ["/relatorios", "Relatórios", BarChart3],
-  ["/usuarios", "Usuários", UserCog],
+  ["/usuarios", "Administração", UserCog],
   ["/auditoria", "Auditoria", ScrollText],
   ["/configuracoes", "Configurações", Settings],
 ] as const;
@@ -74,7 +74,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           .filter(
             ([href]) =>
               sessao.usuario.perfil === "ADMINISTRADOR" ||
-              !["/usuarios", "/auditoria", "/configuracoes"].includes(href),
+              !["/auditoria", "/configuracoes"].includes(href),
           )
           .map(([href, label, Icon]) => (
             <Link
@@ -148,13 +148,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="ml-auto mr-3 hidden sm:block"><TimeCloudCard /></div>
           <button
             aria-label="Notificações"
-            className="notification-button"
+            className="notification-button notification-floating"
           >
             <Bell className="bell" size={18} />
             <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
           </button>
         </header>
-        <main className="min-w-0 overflow-x-hidden p-4 md:p-7">{children}</main>
+        <main className="min-w-0 overflow-x-hidden p-4 pb-28 md:p-7 md:pb-7">{children}</main>
+        <nav className="mobile-dock" aria-label="Navegação principal">
+          {itens.slice(0,8).filter((_,index)=>[0,3,5,6,7].includes(index)).map(([href,label,Icon])=>(
+            <Link key={href} href={href} title={label} className={`mobile-dock-item ${path===href?"active":""}`}>
+              <Icon/><span>{label==="Visão geral"?"Início":label}</span>
+            </Link>
+          ))}
+        </nav>
       </div>
     </div>
   );

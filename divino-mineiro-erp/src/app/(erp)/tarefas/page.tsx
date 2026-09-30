@@ -1,135 +1,25 @@
 "use client";
-import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Plus, Search } from "lucide-react";
+import { useMemo,useState } from "react";
+import { ArrowLeft,ArrowRight,Check,ImageIcon,Pin,PinOff,Plus,Search,X } from "lucide-react";
 import { tarefasMock } from "@/lib/mock-data";
-import type { StatusTarefa, Tarefa } from "@/types";
+import type { StatusTarefa,Tarefa } from "@/types";
 import { dataBr } from "@/lib/utils";
 import { PageHeading } from "@/components/page-heading";
 import { StatusBadge } from "@/components/status-badge";
-const colunas: { status: StatusTarefa; label: string; className: string }[] = [
-  { status: "PENDENTE", label: "Pendentes", className: "kanban-pending" },
-  {
-    status: "EM_ANDAMENTO",
-    label: "Em andamento",
-    className: "kanban-progress",
-  },
-  { status: "CONCLUIDA", label: "Concluídas", className: "kanban-done" },
-];
-export default function Tarefas() {
-  const [tarefas, setTarefas] = useState<Tarefa[]>(tarefasMock),
-    [busca, setBusca] = useState("");
-  const filtradas = useMemo(
-    () =>
-      tarefas.filter((t) =>
-        (t.titulo + t.responsavelNome + t.categoria)
-          .toLowerCase()
-          .includes(busca.toLowerCase()),
-      ),
-    [tarefas, busca],
-  );
-  const mover = (id: string, status: StatusTarefa) =>
-    setTarefas((a) => a.map((i) => (i.id === id ? { ...i, status } : i)));
-  const voltar = (t: Tarefa) =>
-    mover(t.id, t.status === "CONCLUIDA" ? "EM_ANDAMENTO" : "PENDENTE");
-  const avancar = (t: Tarefa) =>
-    mover(t.id, t.status === "PENDENTE" ? "EM_ANDAMENTO" : "CONCLUIDA");
-  const finalizar = (id: string) =>
-    confirm("Finalizar e excluir esta tarefa definitivamente?") &&
-    setTarefas((a) => a.filter((t) => t.id !== id));
-  return (
-    <>
-      <PageHeading
-        title="Tarefas"
-        description="Fluxo diário com avanço e retorno entre etapas."
-        action={
-          <button className="btn-primary">
-            <Plus size={17} />
-            Nova tarefa
-          </button>
-        }
-      />
-      <div className="card mb-4 flex items-center gap-2 py-3">
-        <Search size={17} />
-        <input
-          className="w-full bg-transparent outline-none"
-          placeholder="Filtrar por tarefa, responsável ou categoria..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-        />
-      </div>
-      <div className="grid gap-4 xl:grid-cols-3">
-        {colunas.map((c) => (
-          <section
-            key={c.status}
-            className={`rounded-2xl border p-3 ${c.className}`}
-          >
-            <div className="mb-3 flex items-center justify-between">
-              <b>{c.label}</b>
-              <span className="rounded-full bg-white/80 px-2 py-0.5 text-xs font-bold">
-                {filtradas.filter((t) => t.status === c.status).length}
-              </span>
-            </div>
-            <div className="space-y-3">
-              {filtradas
-                .filter((t) => t.status === c.status)
-                .map((t) => (
-                  <article
-                    key={t.id}
-                    className="rounded-xl border bg-card p-4 shadow-sm"
-                  >
-                    <div className="mb-2 flex items-start justify-between gap-2">
-                      <h3 className="font-semibold">{t.titulo}</h3>
-                      <StatusBadge status={t.prioridade} />
-                    </div>
-                    <p className="text-xs text-foreground/55">
-                      {t.categoria} • {t.responsavelNome}
-                    </p>
-                    <p className="mt-3 text-xs">Prazo: {dataBr(t.prazo)}</p>
-                    <div className="mt-4 flex gap-2">
-                      {t.status !== "PENDENTE" && (
-                        <button
-                          className="btn-outline flex-1"
-                          onClick={() => voltar(t)}
-                        >
-                          <ArrowLeft size={16} />
-                          Voltar
-                        </button>
-                      )}
-                      {t.status === "CONCLUIDA" ? (
-                        <button
-                          aria-label="Finalizar e descartar tarefa"
-                          className="finish-button"
-                          onClick={() => finalizar(t.id)}
-                        >
-                          <svg
-                            viewBox="0 0 448 512"
-                            className="finish-icon"
-                            aria-hidden="true"
-                          >
-                            <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z" />
-                          </svg>
-                          <span>Finalizar</span>
-                        </button>
-                      ) : (
-                        <button
-                          className="btn-primary flex-1"
-                          onClick={() => avancar(t)}
-                        >
-                          {t.status === "PENDENTE" ? "Iniciar" : "Concluir"}
-                          {t.status === "EM_ANDAMENTO" ? (
-                            <Check size={16} />
-                          ) : (
-                            <ArrowRight size={16} />
-                          )}
-                        </button>
-                      )}
-                    </div>
-                  </article>
-                ))}
-            </div>
-          </section>
-        ))}
-      </div>
-    </>
-  );
+const colunas:{status:StatusTarefa;label:string;className:string}[]=[{status:"PENDENTE",label:"Pendentes",className:"kanban-pending"},{status:"EM_ANDAMENTO",label:"Em andamento",className:"kanban-progress"},{status:"CONCLUIDA",label:"Concluídas",className:"kanban-done"}];
+export default function Tarefas(){
+ const [tarefas,setTarefas]=useState<Tarefa[]>(tarefasMock),[busca,setBusca]=useState(""),[modal,setModal]=useState(false),[detalhe,setDetalhe]=useState<Tarefa|null>(null),[imagem,setImagem]=useState("");
+ const filtradas=useMemo(()=>tarefas.filter(t=>(t.titulo+t.responsavelNome+t.categoria).toLowerCase().includes(busca.toLowerCase())),[tarefas,busca]);
+ const mover=(id:string,status:StatusTarefa)=>setTarefas(a=>a.map(i=>i.id===id?{...i,status}:i));
+ const alternarFixacao=(id:string)=>{setTarefas(a=>a.map(i=>i.id===id?{...i,diaria:!i.diaria}:i));setDetalhe(d=>d?.id===id?{...d,diaria:!d.diaria}:d)};
+ const voltar=(t:Tarefa)=>mover(t.id,t.status==="CONCLUIDA"?"EM_ANDAMENTO":"PENDENTE");
+ const avancar=(t:Tarefa)=>mover(t.id,t.status==="PENDENTE"?"EM_ANDAMENTO":"CONCLUIDA");
+ function salvar(e:React.FormEvent<HTMLFormElement>){e.preventDefault();const d=new FormData(e.currentTarget),hoje=new Date().toISOString().slice(0,10);setTarefas(a=>[{id:crypto.randomUUID(),titulo:String(d.get("titulo")),descricao:String(d.get("descricao")),imagem:imagem||undefined,diaria:d.get("diaria")==="on",dataAbertura:hoje,responsavelNome:String(d.get("responsavel")),categoria:String(d.get("categoria")),prioridade:String(d.get("prioridade")) as Tarefa["prioridade"],prazo:String(d.get("prazo")),status:"PENDENTE"},...a]);setModal(false);setImagem("")}
+ function carregarImagem(file?:File){if(!file)return;const r=new FileReader();r.onload=()=>setImagem(String(r.result));r.readAsDataURL(file)}
+ return <><PageHeading title="Tarefas" description="Fluxo diário, recorrências, descrições e anexos." action={<button className="btn-primary" onClick={()=>setModal(true)}><Plus size={17}/>Nova tarefa</button>}/>
+ <div className="card mb-4 flex items-center gap-2 py-3"><Search size={17}/><input className="w-full bg-transparent outline-none" placeholder="Filtrar por tarefa, responsável ou categoria..." value={busca} onChange={e=>setBusca(e.target.value)}/></div>
+ <div className="kanban-grid grid gap-4 xl:grid-cols-3">{colunas.map(c=><section key={c.status} className={`rounded-2xl border p-3 ${c.className}`}><div className="mb-3 flex items-center justify-between"><b>{c.label}</b><span className="rounded-full bg-white/80 px-2 py-.5 text-xs font-bold">{filtradas.filter(t=>t.status===c.status).length}</span></div><div className="space-y-3">{filtradas.filter(t=>t.status===c.status).map(t=><article key={t.id} className="cursor-pointer rounded-xl border bg-card p-4 shadow-sm" onClick={()=>setDetalhe(t)}><div className="mb-2 flex items-start justify-between gap-2"><h3 className="font-semibold">{t.titulo}</h3><StatusBadge status={t.prioridade}/></div>{t.descricao&&<p className="line-clamp-2 text-sm text-foreground/60">{t.descricao}</p>}<p className="mt-2 text-xs text-foreground/55">{t.categoria} • {t.responsavelNome}</p><div className="mt-3 flex items-center justify-between text-xs"><span>{t.diaria?"Diária":`Aberta em ${dataBr(t.dataAbertura||t.prazo)}`} · Prazo: {dataBr(t.prazo)}</span><div className="flex gap-1">{t.diaria&&<span title="Tarefa fixada" className="rounded-lg bg-orange-100 p-1.5 text-primary"><Pin size={15}/></span>}{t.imagem&&<span title="Possui imagem" className="rounded-lg bg-orange-100 p-1.5 text-primary"><ImageIcon size={15}/></span>}</div></div><div className="mt-4 flex gap-2" onClick={e=>e.stopPropagation()}>{t.diaria&&<button className="icon-action" title="Desfixar tarefa" onClick={()=>alternarFixacao(t.id)}><PinOff/></button>}{t.status!=="PENDENTE"&&<button className="btn-outline flex-1" onClick={()=>voltar(t)}><ArrowLeft size={16}/>Voltar</button>}{t.status==="CONCLUIDA"?<button className="finish-button" onClick={()=>setTarefas(a=>a.filter(i=>i.id!==t.id))}><svg viewBox="0 0 448 512" className="finish-icon"><path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/></svg><span>Finalizar</span></button>:<button className="btn-primary flex-1" onClick={()=>avancar(t)}>{t.status==="PENDENTE"?"Iniciar":"Concluir"}{t.status==="EM_ANDAMENTO"?<Check size={16}/>:<ArrowRight size={16}/>}</button>}</div></article>)}</div></section>)}</div>
+ {modal&&<div className="modal-backdrop"><form className="card modal-panel" onSubmit={salvar}><div className="modal-title"><h2>Nova tarefa</h2><button type="button" onClick={()=>setModal(false)}><X/></button></div><div className="grid gap-4 sm:grid-cols-2"><label className="sm:col-span-2"><span className="label">Título</span><input className="input" name="titulo" required/></label><label className="sm:col-span-2"><span className="label">Descrição</span><textarea className="input min-h-24 py-3" name="descricao"/></label><label><span className="label">Responsável</span><input className="input" name="responsavel" required/></label><label><span className="label">Categoria</span><input className="input" name="categoria" required/></label><label><span className="label">Prioridade</span><select className="input" name="prioridade"><option>BAIXA</option><option>MEDIA</option><option>ALTA</option><option>URGENTE</option></select></label><label><span className="label">Prazo</span><input className="input" type="date" name="prazo" required/></label><label className="sm:col-span-2"><span className="label">Imagem (opcional)</span><input className="input py-2" type="file" accept="image/*" onChange={e=>carregarImagem(e.target.files?.[0])}/></label><label className="flex items-center gap-2 sm:col-span-2"><input type="checkbox" name="diaria"/>Recriar automaticamente todos os dias</label></div><button className="btn-primary mt-6">Criar tarefa</button></form></div>}
+ {detalhe&&<div className="modal-backdrop" onClick={()=>setDetalhe(null)}><article className="card modal-panel" onClick={e=>e.stopPropagation()}><div className="modal-title"><h2>{detalhe.titulo}</h2><button onClick={()=>setDetalhe(null)}><X/></button></div><p className="text-foreground/70">{detalhe.descricao||"Sem descrição."}</p>{detalhe.imagem&&<img src={detalhe.imagem} alt="Imagem vinculada à tarefa" className="mt-4 max-h-96 w-full rounded-xl object-contain"/>}<button className="btn-outline mt-5" onClick={()=>alternarFixacao(detalhe.id)}>{detalhe.diaria?<><PinOff size={16}/>Desfixar tarefa</>:<><Pin size={16}/>Fixar diariamente</>}</button></article></div>}
+ </>;
 }

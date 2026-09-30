@@ -1,14 +1,14 @@
 import type { ContaPagar, Diarista, Fornecedor, JornadaMotoboy, Motoboy, PagamentoDiarista, RegistroDiaria, Solicitacao, Tarefa, Usuario } from "@/types";
 
 export const usuariosMock: Usuario[] = [
-  { id:"u1", nome:"Carlos Andrade", email:"admin@divinomineiro.com.br", perfil:"ADMINISTRADOR", status:"ATIVO", ultimoAcesso:"2026-09-22T09:00:00" },
-  { id:"u2", nome:"Fernanda Lopes", email:"gerente@divinomineiro.com.br", perfil:"GERENCIA", status:"ATIVO", ultimoAcesso:"2026-09-22T08:30:00" },
+  { id:"u1", nome:"Tiago Diniz", email:"admin@divinomineiro.com.br", perfil:"ADMINISTRADOR", categoria:"Proprietário", status:"ATIVO", ultimoAcesso:"2026-09-22T09:00:00" },
+  { id:"u2", nome:"Fernanda Lopes", email:"gerente@divinomineiro.com.br", perfil:"GERENCIA", categoria:"Gerência operacional", status:"ATIVO", ultimoAcesso:"2026-09-22T08:30:00" },
   { id:"u3", nome:"Rogério Pires", email:"rogerio@divinomineiro.com.br", perfil:"GERENCIA", status:"BLOQUEADO", ultimoAcesso:"2026-08-02T14:20:00" }
 ];
 export const fornecedoresMock: Fornecedor[] = [
-  { id:"f1", nomeFantasia:"Hortifruti Serra Verde", documento:"23.456.789/0001-11", responsavel:"João Batista", telefone:"(31) 3344-5566", email:"vendas@serraverde.com.br", categorias:["Hortifruti"], ativo:true, totalComprado:48250.9 },
-  { id:"f2", nomeFantasia:"Frigorífico Boi Manso", documento:"34.567.890/0001-22", responsavel:"Marcos Vinícius", telefone:"(31) 3555-2211", email:"comercial@boimanso.com.br", categorias:["Carnes e Aves"], ativo:true, totalComprado:112400 },
-  { id:"f3", nomeFantasia:"Vale das Águas", documento:"45.678.901/0001-33", responsavel:"Patrícia Nunes", telefone:"(31) 3212-9900", email:"pedidos@valedasaguas.com.br", categorias:["Bebidas"], ativo:true, totalComprado:36870.5 }
+  { id:"f1", nomeFantasia:"Hortifruti Serra Verde", documento:"23.456.789/0001-11", responsavel:"João Batista", telefone:"(31) 3344-5566", email:"vendas@serraverde.com.br", categorias:["Hortifruti"], ativo:true, totalComprado:48250.9, produtos:[{id:"p1",nome:"Tomate",unidade:"kg",valor:7.9},{id:"p2",nome:"Cebola",unidade:"kg",valor:6.5}] },
+  { id:"f2", nomeFantasia:"Frigorífico Boi Manso", documento:"34.567.890/0001-22", responsavel:"Marcos Vinícius", telefone:"(31) 3555-2211", email:"comercial@boimanso.com.br", categorias:["Carnes e Aves"], ativo:true, totalComprado:112400, produtos:[{id:"p3",nome:"Contra-filé",unidade:"kg",valor:48.9},{id:"p4",nome:"Peito de frango",unidade:"kg",valor:19.5}] },
+  { id:"f3", nomeFantasia:"Vale das Águas", documento:"45.678.901/0001-33", responsavel:"Patrícia Nunes", telefone:"(31) 3212-9900", email:"pedidos@valedasaguas.com.br", categorias:["Bebidas"], ativo:true, totalComprado:36870.5, produtos:[{id:"p5",nome:"Água mineral",unidade:"fardo",valor:24}] }
 ];
 export const contasPagarMock: ContaPagar[] = [
   { id:"cp1", descricao:"Hortifruti — semana 38", fornecedorId:"f1", fornecedorNome:"Hortifruti Serra Verde", linhaDigitavel:"34191.79001 01043.510047 91020.150008 1 96380000048250", dataRecebimento:"2026-09-15", dataVencimento:"2026-09-25", valor:4825, categoria:"Hortifruti", centroCusto:"Cozinha", responsavel:"Fernanda Lopes", status:"PENDENTE", recorrente:true },
@@ -33,7 +33,7 @@ export const solicitacoesMock: Solicitacao[] = [
   { id:"s2", numero:"SOL-2026-0042", produto:"Carvão para churrasqueira", fornecedorNome:"A definir", solicitanteNome:"Fernanda Lopes", dataNecessaria:"2026-09-24", valorTotal:250, prioridade:"URGENTE", status:"APROVADO" }
 ];
 export const tarefasMock: Tarefa[] = [
-  { id:"t1", titulo:"Conferir estoque de bebidas", responsavelNome:"Fernanda Lopes", categoria:"Estoque", prioridade:"MEDIA", prazo:"2026-09-22", status:"EM_ANDAMENTO" },
+  { id:"t1", titulo:"Conferir estoque de bebidas", descricao:"Conferir salão, cozinha e câmara fria antes da abertura.", diaria:true, dataAbertura:"2026-09-22", responsavelNome:"Fernanda Lopes", categoria:"Estoque", prioridade:"MEDIA", prazo:"2026-09-22", status:"EM_ANDAMENTO" },
   { id:"t2", titulo:"Negociar contrato de carnes", responsavelNome:"Carlos Andrade", categoria:"Fornecedores", prioridade:"ALTA", prazo:"2026-09-21", status:"PENDENTE" },
   { id:"t3", titulo:"Atualizar cardápio de outubro", responsavelNome:"Fernanda Lopes", categoria:"Operacional", prioridade:"BAIXA", prazo:"2026-09-28", status:"CONCLUIDA" },
   { id:"t4", titulo:"Revisar manutenção das coifas", responsavelNome:"Carlos Andrade", categoria:"Manutenção", prioridade:"URGENTE", prazo:"2026-09-19", status:"PENDENTE" }

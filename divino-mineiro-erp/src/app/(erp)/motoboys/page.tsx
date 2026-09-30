@@ -63,6 +63,7 @@ export default function Motoboys() {
   const [busca, setBusca] = useState("");
   const [{ inicio, fim }] = useState(semanaAtual);
   const [modal, setModal] = useState(false);
+  const [confirmarFechamento, setConfirmarFechamento] = useState(false);
   const [editando, setEditando] = useState<Motoboy | null>(null);
   const filtrados = useMemo(
     () =>
@@ -107,7 +108,6 @@ export default function Motoboys() {
   }
 
   function fecharSemana() {
-    if (!confirm(`Fechar a semana de ${inicio.split("-").reverse().join("/")} a ${fim.split("-").reverse().join("/")}? Os lançamentos serão enviados aos relatórios e esta tela será zerada.`)) return;
     const fechamento = {
       id: crypto.randomUUID(),
       inicio,
@@ -126,7 +126,7 @@ export default function Motoboys() {
       ...Object.fromEntries(Object.keys(atual).map((id) => [id, dias.map(() => ({ tipo: "TRABALHOU" as const, valor: 0 }))])),
     }));
     setLista((atual) => atual.map((item) => ({ ...item, statusPagamento: "PENDENTE" })));
-    alert("Semana fechada e enviada para Relatórios > Motoboys.");
+    setConfirmarFechamento(false);
   }
 
   function salvar(evento: React.FormEvent<HTMLFormElement>) {
@@ -192,7 +192,7 @@ export default function Motoboys() {
         <CalendarCheck2 size={18} />
         Semana atual: {inicio.split("-").reverse().join("/")} — {fim.split("-").reverse().join("/")}
       </div>
-      <section className="mb-5 grid gap-4 sm:grid-cols-3">
+      <section className="motoboy-metrics mb-5 grid gap-4 sm:grid-cols-3">
         <div className="card">
           <p className="metric-label">Ativos</p>
           <b className="metric-value">{lista.filter((m) => m.ativo).length}</b>
@@ -260,7 +260,7 @@ export default function Motoboys() {
                           type="number"
                           step="0.01"
                           min="0"
-                          value={dia.valor}
+                          value={dia.valor || ""}
                           onChange={(e) =>
                             atualizarDia(m.id, indice, {
                               valor: Number(e.target.value),
@@ -298,12 +298,7 @@ export default function Motoboys() {
                     <button
                       aria-label="Excluir"
                       className="icon-action text-red-600"
-                      onClick={() =>
-                        confirm("Excluir motoboy?") &&
-                        setLista((atual) =>
-                          atual.filter((item) => item.id !== m.id),
-                        )
-                      }
+                      onClick={() => setLista((atual) => atual.filter((item) => item.id !== m.id))}
                     >
                       <Trash2 />
                     </button>
@@ -316,11 +311,12 @@ export default function Motoboys() {
       </div>
       <section className="mt-5 rounded-2xl border border-orange-200 bg-orange-50 p-5 text-center">
         <p className="mb-3 text-sm text-foreground/65">Ao fechar, os valores e pagamentos desta semana serão guardados no histórico e os campos voltarão a zero.</p>
-        <button className="btn-primary h-12 w-full text-base" onClick={fecharSemana}>
+        <button className="btn-primary h-12 w-full text-base" onClick={()=>setConfirmarFechamento(true)}>
           <CalendarCheck2 size={19} />
           Fechar a semana
         </button>
       </section>
+      {confirmarFechamento&&<div className="modal-backdrop"><section className="card modal-panel"><div className="modal-title"><div><h2>Resumo do fechamento</h2><p className="text-sm font-normal text-foreground/55">{inicio.split("-").reverse().join("/")} a {fim.split("-").reverse().join("/")}</p></div><button onClick={()=>setConfirmarFechamento(false)}><X/></button></div><div className="table-wrap"><table><thead><tr><th>Motoboy</th><th>Fretes</th><th>Diárias + fretes</th><th>PIX</th><th>Status</th></tr></thead><tbody>{lista.map(m=>{const fretes=jornadasMotoboyMock.find(j=>j.motoboyId===m.id)?.fretes.reduce((s,n)=>s+n,0)||0;return <tr key={m.id}><td className="font-semibold">{m.nome}</td><td>{fretes}</td><td>{moeda(total(m.id))}</td><td>{m.chavePix}</td><td><span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${m.statusPagamento==="PAGO"?"bg-green-100 text-green-700":"bg-amber-100 text-amber-800"}`}>{m.statusPagamento==="PAGO"?"Pago":"Pendente"}</span></td></tr>})}</tbody></table></div><div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end"><button className="btn-outline" onClick={()=>setConfirmarFechamento(false)}>Voltar e revisar</button><button className="btn-primary" onClick={fecharSemana}><CalendarCheck2 size={18}/>Confirmar e fechar semana</button></div></section></div>}
       {modal && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
           <form onSubmit={salvar} className="card w-full max-w-2xl">

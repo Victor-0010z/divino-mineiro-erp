@@ -91,7 +91,7 @@ function Financeiro({
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="nome" tickLine={false} />
+            <XAxis dataKey="nome" tickLine={false} axisLine={false} interval={0} minTickGap={0} tick={{ fontSize: 10 }} />
             <YAxis hide />
             <Tooltip formatter={(v) => moeda(Number(v))} />
             <Area
@@ -122,12 +122,6 @@ export default function Dashboard() {
       "/contas",
     ],
     [
-      "Boletos vencidos",
-      String(contasPagarMock.filter((c) => c.status === "VENCIDO").length),
-      AlertTriangle,
-      "/contas",
-    ],
-    [
       "Diárias pendentes",
       String(registrosDiariaMock.filter((r) => r.status !== "PAGO").length),
       UsersRound,
@@ -144,10 +138,8 @@ export default function Dashboard() {
       "/compras",
     ],
     [
-      "Motoboys pendentes",
-      String(
-        motoboysMock.filter((m) => m.statusPagamento === "PENDENTE").length,
-      ),
+      "Motoboys escalados",
+      String(motoboysMock.filter((m) => m.ativo).length),
       Bike,
       "/motoboys",
     ],
@@ -180,7 +172,7 @@ export default function Dashboard() {
           <option value="30">Últimos 30 dias</option>
         </select>
       </div>
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <section className="dashboard-summary grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {cards.map(([titulo, valor, Icon, rota]) => (
           <Link href={rota} className="dashboard-card" key={titulo}>
             <span className="dashboard-icon">
@@ -193,7 +185,13 @@ export default function Dashboard() {
           </Link>
         ))}
       </section>
-      <section className="mt-5 grid gap-5 xl:grid-cols-2">
+      <Link href="/contas" className="card mt-5 block border-orange-200 bg-gradient-to-r from-orange-50 to-white">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3"><span className="dashboard-icon"><AlertTriangle size={20}/></span><div><h2 className="font-bold">Boletos que precisam de atenção</h2><p className="metric-label">Visão consolidada de pendências e vencimentos</p></div></div>
+          <div className="flex gap-8"><div><span className="metric-label">Pendentes</span><b className="block text-xl text-amber-700">{contasPagarMock.filter(c=>c.status==="PENDENTE").length}</b></div><div><span className="metric-label">Vencidos</span><b className="block text-xl text-red-600">{contasPagarMock.filter(c=>c.status==="VENCIDO").length}</b></div><div><span className="metric-label">Total em aberto</span><b className="block text-xl">{moeda(contasPagarMock.filter(c=>c.status!=="PAGO").reduce((s,c)=>s+c.valor,0))}</b></div></div>
+        </div>
+      </Link>
+      <section className="dashboard-charts mt-5 grid gap-5 xl:grid-cols-2">
         <Financeiro
           titulo="Valores pagos"
           total={pagos.reduce((s, d) => s + d.valor, 0)}
@@ -209,7 +207,7 @@ export default function Dashboard() {
           rota={`/relatorios?secao=contas&periodo=${periodo}&status=pendente`}
         />
       </section>
-      <section className="mt-5 grid gap-5 xl:grid-cols-2">
+      <section className="dashboard-rankings mt-5 grid gap-5 xl:grid-cols-2">
         <article className="card">
           <div className="mb-3">
             <h2 className="font-bold">Motoboys com maior valor</h2>
@@ -225,8 +223,10 @@ export default function Dashboard() {
                 <YAxis
                   type="category"
                   dataKey="nome"
-                  width={70}
+                  width={54}
                   tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 10 }}
                 />
                 <Tooltip formatter={(v) => moeda(Number(v))} />
                 <Bar
@@ -250,7 +250,7 @@ export default function Dashboard() {
             <ResponsiveContainer>
               <BarChart data={fornecedores}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="nome" tickLine={false} />
+                <XAxis dataKey="nome" tickLine={false} axisLine={false} interval={0} minTickGap={0} tick={{ fontSize: 9 }} />
                 <YAxis hide />
                 <Tooltip formatter={(v) => moeda(Number(v))} />
                 <Bar

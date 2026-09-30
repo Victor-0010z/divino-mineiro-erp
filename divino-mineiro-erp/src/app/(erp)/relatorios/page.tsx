@@ -2,7 +2,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Bike,
-  CalendarRange,
   FileClock,
   ListTodo,
   Printer,
@@ -22,7 +21,9 @@ import {
 import { moeda } from "@/lib/utils";
 import { PageHeading } from "@/components/page-heading";
 import { DownloadReportButton } from "@/components/download-report-button";
+import { StatusBadge } from "@/components/status-badge";
 import { lerFechamentosMotoboys, type MotoboyFechamento } from "@/lib/motoboy-history";
+import { DateRangePicker } from "@/components/date-range-picker";
 
 const secoes = [
   { id: "contas", nome: "Contas a pagar", icon: ReceiptText },
@@ -37,11 +38,8 @@ const secoes = [
 export default function Relatorios() {
   const [secao, setSecao] = useState("contas"),
     [busca, setBusca] = useState(""),
-    [inicio, setInicio] = useState("2026-09-01"),
-    [fim, setFim] = useState("2026-09-30"),
-    [inicioRascunho, setInicioRascunho] = useState(inicio),
-    [fimRascunho, setFimRascunho] = useState(fim),
-    [calendarioAberto, setCalendarioAberto] = useState(false),
+    [inicio, setInicio] = useState(""),
+    [fim, setFim] = useState(""),
     [fechamentos, setFechamentos] = useState<MotoboyFechamento[]>([]);
 
   useEffect(() => setFechamentos(lerFechamentosMotoboys()), []);
@@ -83,7 +81,7 @@ export default function Relatorios() {
           i.ativo ? "ATIVO" : "INATIVO",
         ]);
     if (secao === "motoboys") {
-      const noPeriodo = fechamentos.filter((fechamento) => fechamento.fim >= inicio && fechamento.inicio <= fim);
+      const noPeriodo = inicio&&fim?fechamentos.filter((fechamento) => fechamento.fim >= inicio && fechamento.inicio <= fim):fechamentos;
       const somados = new Map<string, { nome: string; pix: string; valor: number; pagos: number; pendentes: number }>();
       noPeriodo.forEach((fechamento) => fechamento.itens.forEach((item) => {
         const atual = somados.get(item.motoboyId) || { nome: item.nome, pix: item.chavePix, valor: 0, pagos: 0, pendentes: 0 };
@@ -97,7 +95,7 @@ export default function Relatorios() {
         .map((item) => [
           item.nome,
           item.pix,
-          `${inicio.split("-").reverse().join("/")} a ${fim.split("-").reverse().join("/")}`,
+          inicio&&fim?`${inicio.split("-").reverse().join("/")} a ${fim.split("-").reverse().join("/")}`:"Histórico completo",
           moeda(item.valor),
           item.pendentes === 0 ? "PAGO" : item.pagos === 0 ? "PENDENTE" : `PARCIAL (${item.pagos} pago / ${item.pendentes} pendente)`,
         ]);
@@ -163,8 +161,8 @@ export default function Relatorios() {
           </div>
         }
       />
-      <div className="grid gap-5 xl:grid-cols-[250px_1fr]">
-        <aside className="card h-fit p-2">
+      <div className="reports-layout grid gap-5 xl:grid-cols-[250px_1fr]">
+        <aside className="reports-nav card h-fit p-2">
           <p className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-foreground/45">
             Seções
           </p>
@@ -187,42 +185,20 @@ export default function Relatorios() {
               onChange={(e) => setBusca(e.target.value)}
               placeholder={`Filtrar em ${nomeSecao.toLowerCase()}...`}
             />
-            <div className="relative">
-              <button className="date-range-trigger" onClick={() => setCalendarioAberto((aberto) => !aberto)}>
-                <CalendarRange size={18} />
-                <span>{inicio.split("-").reverse().join("/")} — {fim.split("-").reverse().join("/")}</span>
-              </button>
-              {calendarioAberto && (
-                <div className="date-range-popover">
-                  <p className="mb-3 font-semibold">Escolha o período</p>
-                  <label><span className="label">Data inicial</span><input className="input" type="date" value={inicioRascunho} onChange={(e) => setInicioRascunho(e.target.value)} /></label>
-                  <label><span className="label mt-3">Data final</span><input className="input" type="date" min={inicioRascunho} value={fimRascunho} onChange={(e) => setFimRascunho(e.target.value)} /></label>
-                  <button
-                    className="btn-primary mt-4 w-full"
-                    onClick={() => {
-                      if (fimRascunho < inicioRascunho) return alert("A data final precisa ser posterior à data inicial.");
-                      setInicio(inicioRascunho);
-                      setFim(fimRascunho);
-                      setCalendarioAberto(false);
-                    }}
-                  >Aplicar período</button>
-                </div>
-              )}
-            </div>
+            <DateRangePicker inicio={inicio} fim={fim} onApply={(a, b) => { setInicio(a); setFim(b); }} />
           </div>
           <div className="mb-3 flex items-end justify-between">
             <div>
               <h2 className="section-title">{nomeSecao}</h2>
               <p className="text-sm text-foreground/50">
-                {inicio.split("-").reverse().join("/")} a{" "}
-                {fim.split("-").reverse().join("/")}
+                {inicio&&fim?`${inicio.split("-").reverse().join("/")} a ${fim.split("-").reverse().join("/")}`:"Todos os registros"}
               </p>
             </div>
             <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-bold text-primary">
               {linhas.length} registros
             </span>
           </div>
-          <div className="table-wrap">
+          <div className="table-wrap reports-table">
             <table>
               <thead>
                 <tr>
@@ -235,9 +211,7 @@ export default function Relatorios() {
                 {linhas.map((linha, i) => (
                   <tr key={i}>
                     {linha.map((celula, j) => (
-                      <td key={j} className={j === 0 ? "font-semibold" : ""}>
-                        {celula}
-                      </td>
+                      <td key={j} data-label={String(rows[0][j])} className={j === 0 ? "font-semibold" : ""}>{j===4?<StatusBadge status={String(celula).split(" ")[0]}/>:celula}</td>
                     ))}
                   </tr>
                 ))}
